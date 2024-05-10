@@ -44,9 +44,10 @@ with st.expander('Click to view your data set'):
     st.dataframe(dict_params['df'])
 
 #add button to run the model
-#with st.sidebar:
-#    button_run_model = st.button(label='Run model')
-button_run_model = True
+with st.sidebar:
+    button_run_model = st.button(label='Run model')
+
+#button_run_model = True
 if button_run_model:
 
     st.subheader(':green[Outlier detection and interpolation]')

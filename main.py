@@ -44,9 +44,9 @@ with st.expander('Click to view your data set'):
     st.dataframe(dict_params['df'])
 
 #add button to run the model
-with st.sidebar:
-    button_run_model = st.button(label='Run model')
-
+#with st.sidebar:
+#    button_run_model = st.button(label='Run model')
+button_run_model = True
 if button_run_model:
 
     st.subheader(':green[Outlier detection and interpolation]')
@@ -89,11 +89,32 @@ if button_run_model:
 
     forecast = model.predict(future)
 
-    chart = plots.plot_forecast_with_components(df_outliers_and_missing_values_interpolated, forecast, dict_params['datetime_field'])
+    chart_forecast = plots.plot_forecast_with_components(df_outliers_and_missing_values_interpolated, forecast, dict_params['datetime_field'])
 
     #render the chart
-    st.altair_chart(chart, use_container_width=True)
+    #st.altair_chart(chart_forecast, use_container_width=True)
 
+
+    #get model components (Charts and explanations)
+    dict_component_charts, dict_of_explanations_for_charts = plots.create_dict_of_component_charts(dict_params['datetime_field'], forecast)
+
+    #set up the tabs to render all outputs
+    # Begin a tab structure with the main forecast
+    tab1, *other_tabs = st.tabs(["Main Forecast"] + list(dict_component_charts.keys()))
+    with tab1:
+        st.altair_chart(chart_forecast, use_container_width=True)
+        st.write("This chart shows the main forecast values along with confidence intervals.")
+
+    for component_name, chart in dict_component_charts.items():
+        with other_tabs[list(dict_component_charts.keys()).index(component_name)]:
+            #provide explanation of component
+            st.write(dict_of_explanations_for_charts[component_name])
+            #render the component chart
+            st.altair_chart(chart, use_container_width=True)
+
+    #--------------------------------------------
+    #--------------------------------------------
+    
 
     if dict_params['num_appts_per_patient'] == "Single appt per patient":
         #isolate the forecast values to derive the demand value at the user-provided percentile value

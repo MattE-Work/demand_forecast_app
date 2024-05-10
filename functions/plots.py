@@ -108,3 +108,71 @@ def plot_forecast_with_components(df, forecast, date_column):
     return chart
 
 #-----------------------------------------------
+
+
+
+# Function to create a chart for a specific component
+def create_dict_of_component_charts(date_column, forecast):
+    # Base chart for main forecast
+    base_chart = alt.Chart(forecast).encode(
+        x=alt.X(f"{date_column}:T", title='Date')
+    ).interactive()
+
+    def component_chart(component_name, color):
+        return base_chart.mark_line(color=color).encode(
+            y=alt.Y(f"{component_name}:Q", title=component_name.capitalize()),
+            tooltip=[f"{date_column}", f"{component_name}:Q"]
+        )
+
+    # Initialize a list to collect all component charts
+    dict_of_charts = {}
+    dict_of_explanations_for_charts = {}
+
+    # Check and plot each component if it exists in the forecast DataFrame
+    for component in ['trend', 'weekly', 'yearly', 'additive_terms', 'multiplicative_terms']:
+        if component in forecast.columns:
+            #charts.append(component_chart(component, 'green' if component == 'trend' else 'orange'))
+            dict_of_charts[component] = component_chart(component, 'green' if component == 'trend' else 'orange')
+
+            # Explanation dictionary
+            if component == 'trend':
+                dict_of_explanations_for_charts[component] = "Shows the long-term movement in data, removing shorter fluctuations to reveal underlying patterns."
+            elif component == 'weekly':
+                dict_of_explanations_for_charts[component] = "Represents the weekly cycle in the data, showing how values change on different days of the week."
+            elif component == 'yearly':
+                dict_of_explanations_for_charts[component] = "Highlights annual patterns, useful for understanding seasonal effects across the year."
+            elif component == 'additive_terms':
+                dict_of_explanations_for_charts[component] = """
+                Sum of all the additive model components, including seasonal 
+                effects not captured in main terms. A positive value means an 
+                increase over the base trend, while a negative value indicates a 
+                decrease. 
+                \n**Interpretation example:** If you see that during mid-year, the additive terms spike up, 
+                it could be due to increased patient visits typically seen during summer months, 
+                possibly related to common seasonal ailments or injuries for that time of year, that the 
+                model has learned. By observing this chart, you can understand 
+                when and how much these factors are expected to change the 
+                forecast beyond the underlying trend. 
+                \nThere is no need to adjust the forecast values, additive trend is accounted for already."""
+
+            elif component == 'multiplicative_terms':
+                dict_of_explanations_for_charts[component] = """
+                Shows how certain effects scale the trend multiplicatively, often 
+                related to more complex interactions in the data.
+                \n**Impact on the forecast:** Multiplicative terms can significantly alter the forecast, 
+                especially in situations with high variability. They can lead to 
+                exponential increases or decreases based on the model's understanding 
+                of underlying patterns.
+                \n**Magnitude and direction:** The exact value of these terms tells 
+                you by how much the base forecast is being scaled. A consistent 
+                value close to 1 suggests minimal multiplicative impact, while 
+                significant deviations show strong seasonal or event-driven effects.
+                \nThere is no need to adjust the forecast values, multiplicative trend is accounted for already."""
+
+
+    # Combine all charts vertically
+    #combined_chart = alt.vconcat(*charts).resolve_scale(y='independent')
+
+    #return combined_chart
+    return dict_of_charts, dict_of_explanations_for_charts
+#-----------------------------------------------

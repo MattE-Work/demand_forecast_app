@@ -24,7 +24,7 @@ def render_sidebar():
         with st.popover('Set columns'):
             datetime_field = st.selectbox(label='Select the date/time field', options=list(df.columns))
             activity_count_field = st.selectbox(label='Select the field containing activity counts', options=list(df.columns))
-            unit_of_measurement = st.selectbox(label='What is the unit of measurement', options=['year', 'quarter', 'month', 'week', 'day', 'hour', 'minute', 'second'], index=3)
+            unit_of_measurement = st.selectbox(label='What is the unit of measurement', options=['year', 'quarter', 'month', 'week', 'day', 'hour', 'minute', 'second'], index=4)
 
             dict_unit_text_to_parameter_term = {
                 'year': 'Y', #year end
